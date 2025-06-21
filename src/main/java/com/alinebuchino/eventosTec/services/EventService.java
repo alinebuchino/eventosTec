@@ -2,6 +2,7 @@ package com.alinebuchino.eventosTec.services;
 
 import com.alinebuchino.eventosTec.DTOs.EventRequestDTO;
 import com.alinebuchino.eventosTec.domain.Event;
+import com.alinebuchino.eventosTec.repositories.EventRepository;
 import com.amazonaws.services.s3.AmazonS3;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -9,7 +10,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Date;
@@ -21,6 +21,9 @@ public class EventService {
 
     @Autowired
     private AmazonS3 s3cliente;
+
+    @Autowired
+    private EventRepository repository;
 
     @Value("${aws.bucket.name}")
     private String awsBucketName;
@@ -40,6 +43,8 @@ public class EventService {
         newEvent.setDate(new Date(data.date()));
         newEvent.setImgUrl(imgUrl);
 
+        repository.save(newEvent);
+
         return newEvent;
     }
 
@@ -54,7 +59,7 @@ public class EventService {
             return s3cliente.getUrl(awsBucketName, fileName).toString();
         } catch (Exception e) {
             System.out.println("Erro ao enviar o arquivo na AWS");
-            return null;
+            return "";
         }
     }
 
